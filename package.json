@@ -1,6 +1,6 @@
 {
   "name": "@threespot/visual-regression",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Playwright-based cross-browser visual regression testing for Threespot client sites.",
   "license": "MIT",
   "main": "src/index.js",
