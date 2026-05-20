@@ -1,0 +1,37 @@
+{
+  "name": "@threespot/visual-regression",
+  "version": "0.1.0",
+  "description": "Playwright-based cross-browser visual regression testing for Threespot client sites.",
+  "license": "MIT",
+  "main": "src/index.js",
+  "bin": {
+    "vrt": "bin/vrt.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "tests",
+    "example",
+    "playwright.config.js",
+    "README.md"
+  ],
+  "scripts": {
+    "test:cli": "node bin/vrt.js",
+    "version:patch": "npm version patch -m \"version %s\"",
+    "version:minor": "npm version minor -m \"version %s\"",
+    "version:major": "npm version major -m \"version %s\"",
+    "release:patch": "bash -c 'read -p \"Confirm new patch version (e.g. 0.1.0 → 0.1.1) to GitHub? (y/N) \" -n 1 -r && echo && [[ \"$REPLY\" =~ ^[Yy]$ ]] && yarn version:patch'",
+    "release:minor": "bash -c 'read -p \"Confirm new minor version (e.g. 0.1.0 → 0.2.0) to GitHub? (y/N) \" -n 1 -r && echo && [[ \"$REPLY\" =~ ^[Yy]$ ]] && yarn version:minor'",
+    "release:major": "bash -c 'read -p \"Confirm new major version (e.g. 0.1.0 → 1.0.0) to GitHub? (y/N) \" -n 1 -r && echo && [[ \"$REPLY\" =~ ^[Yy]$ ]] && yarn version:major'",
+    "postversion": "git push && git push --tags"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.49.0",
+    "pixelmatch": "^5.3.0",
+    "pngjs": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "yarn@4.15.0"
+}

@@ -1,0 +1,8 @@
+nodejs 24.15.0
+
+# Yarn is intentionally not pinned here.
+# This project uses Yarn 4.15.0 via Corepack (see `packageManager` in package.json),
+# and the asdf-yarn plugin only supports Yarn Classic (1.x) — it cannot install Yarn 4.
+# To stop asdf's yarn shim from shadowing Corepack's:
+#   asdf set yarn system        (per-project, recommended for this repo)
+# Or remove the asdf-yarn plugin entirely if you've migrated fully to Yarn 4.
