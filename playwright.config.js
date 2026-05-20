@@ -21,9 +21,9 @@ module.exports = {
   retries: 0,
   reporter: [
     ['list'],
-    ['html', { open: 'never', outputFolder: path.join(process.cwd(), 'playwright-report') }],
+    ['html', { open: 'never', outputFolder: path.join(process.cwd(), 'visual-regression', 'playwright-report') }],
   ],
-  outputDir: path.join(process.cwd(), 'test-results'),
+  outputDir: path.join(process.cwd(), 'visual-regression', 'test-results'),
   globalSetup: path.join(__dirname, 'src', 'global-setup.js'),
   use: {
     ignoreHTTPSErrors: true,

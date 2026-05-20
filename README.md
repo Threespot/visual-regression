@@ -44,8 +44,8 @@ Add scripts to the site's `package.json`. Setting `VRT_TEST_URL` here gives devs
 Add the report directories to `.gitignore`:
 
 ```
-playwright-report/
-test-results/
+visual-regression/playwright-report/
+visual-regression/test-results/
 ```
 
 Create `visual-regression/scenarios.js` — see `example/scenarios.js` in this package for a starting point:
@@ -222,8 +222,8 @@ Documented here so the tool actually gets used:
 
 ## Output
 
-- `playwright-report/` — HTML report (gitignored)
-- `test-results/` — per-test artifacts (gitignored)
+- `visual-regression/playwright-report/` — HTML report (gitignored)
+- `visual-regression/test-results/` — per-test artifacts (gitignored)
 
 ## Configuration reference
 

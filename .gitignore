@@ -16,8 +16,8 @@ node_modules/
 package-lock.json
 
 # Playwright output
-playwright-report/
-test-results/
+visual-regression/playwright-report/
+visual-regression/test-results/
 blob-report/
 playwright/.cache/
 
