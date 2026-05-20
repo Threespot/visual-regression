@@ -133,6 +133,12 @@ yarn vrt:test
 
 Credentials are only sent when the request URL's origin matches `VRT_HTTP_ORIGIN`. Production fetches go unauthenticated.
 
+### Pantheon sandbox "Deterrence" warning
+
+Pantheon shows a one-time interstitial ("This website is hosted in a sandbox environment…") on `*.pantheonsite.io` URLs before letting the user through. Clicking the button sets a `Deterrence-Bypass=1` cookie. Without it, the very first page load — i.e. every Playwright test — would screenshot the warning page instead of the real one.
+
+The runner pre-seeds that cookie automatically on any URL whose hostname ends in `.pantheonsite.io`. No configuration needed; custom production domains are untouched.
+
 ### Stashing the credentials in `package.json`
 
 Don't commit passwords to git. The pragmatic pattern: keep credentials in a per-developer `.env` file (gitignored) and source it before running, or put them in the shell's keychain integration. A second `vrt:test-locked` script with the env vars baked in is fine if the password isn't sensitive — but Pantheon's Lock Icon credentials usually are.

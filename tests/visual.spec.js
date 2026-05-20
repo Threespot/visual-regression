@@ -4,6 +4,7 @@ const { applyWordPressDefaults } = require('../src/defaults');
 const { compareScreenshots } = require('../src/compare');
 const { loadScenariosConfig } = require('../src/scenarios');
 const { joinUrl } = require('../src/global-setup');
+const { pantheonBypassCookies } = require('../src/pantheon');
 
 const BASELINE_URL = process.env.VRT_BASELINE_URL;
 const TEST_URL = process.env.VRT_TEST_URL;
@@ -31,7 +32,12 @@ function parseFilter(value) {
 
 async function capture(page, baseUrl, scenario, viewport) {
   await page.setViewportSize({ width: viewport.width, height: viewport.height });
-  await page.goto(joinUrl(baseUrl, scenario.path), { waitUntil: 'networkidle' });
+  const url = joinUrl(baseUrl, scenario.path);
+  const bypassCookies = pantheonBypassCookies(url);
+  if (bypassCookies.length) {
+    await page.context().addCookies(bypassCookies);
+  }
+  await page.goto(url, { waitUntil: 'networkidle' });
   await applyWordPressDefaults(page);
 
   if (typeof beforeScreenshot === 'function') {
