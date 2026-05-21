@@ -30,16 +30,18 @@ Install as a dev dependency:
 yarn add --dev github:threespot/visual-regression#v0.1.0
 ```
 
-Add scripts to the site's `package.json`. Setting `VRT_TEST_URL` here gives devs a sensible default so day-to-day invocation is just `yarn vrt:test`:
+Add scripts to the site's `package.json`. The package only reads URLs from `process.env` — it does not load a `.env` file — so the simplest way to get `yarn vrt:test` working out of the box is to bake both URLs into the script. Update the placeholders below to match your site's environments:
 
 ```json
 {
   "scripts": {
-    "vrt:test": "VRT_TEST_URL=http://acme-site.lndo.site vrt test",
+    "vrt:test": "VRT_BASELINE_URL=https://fixme.org VRT_TEST_URL=http://fixme-site.lndo.site vrt test",
     "vrt:report": "vrt report"
   }
 }
 ```
+
+Either URL can still be overridden on the command line for one-off runs (see [Running tests](#running-tests) below).
 
 Add the report directories to `.gitignore`:
 
@@ -66,20 +68,25 @@ yarn playwright install
 
 ## Running tests
 
+With both URLs set in the `vrt:test` script, the everyday invocation is just:
+
 ```sh
-# Pre-deploy gut-check: local vs. production
-VRT_BASELINE_URL=https://acme.org yarn vrt:test
-
-# Staging review: local vs. multidev
-VRT_BASELINE_URL=https://staging-acme.pantheonsite.io yarn vrt:test
-
-# Change verification: production vs. multidev (no local server needed)
-VRT_BASELINE_URL=https://acme.org \
-VRT_TEST_URL=https://staging-acme.pantheonsite.io \
 yarn vrt:test
 ```
 
-Both `VRT_BASELINE_URL` and `VRT_TEST_URL` are required. The site's `package.json` script supplies the default `VRT_TEST_URL`; override it on the command line for the two-remote mode.
+Override either URL on the command line for one-off comparisons:
+
+```sh
+# Staging review: swap the baseline for a multidev
+VRT_BASELINE_URL=https://staging-fixme.pantheonsite.io yarn vrt:test
+
+# Change verification: production vs. multidev (no local server needed)
+VRT_BASELINE_URL=https://fixme.org \
+VRT_TEST_URL=https://staging-fixme.pantheonsite.io \
+yarn vrt:test
+```
+
+Both `VRT_BASELINE_URL` and `VRT_TEST_URL` are required. The recommended pattern is to bake them into `vrt:test` and override on the command line when needed.
 
 ### Narrowing scope
 
@@ -109,8 +116,8 @@ Most Pantheon environments are publicly accessible, but pre-production environme
 The package supports this via environment variables. The feature is dormant unless both are set:
 
 ```sh
-VRT_BASELINE_URL=https://acme.org \
-VRT_TEST_URL=https://staging-acme.pantheonsite.io \
+VRT_BASELINE_URL=https://fixme.org \
+VRT_TEST_URL=https://staging-fixme.pantheonsite.io \
 VRT_HTTP_USER=pantheon \
 VRT_HTTP_PASS='the-shared-password' \
 yarn vrt:test
@@ -123,11 +130,11 @@ When set, credentials are forwarded to both Playwright (via [`httpCredentials`](
 The common Pantheon case is "production is open, staging is locked." Sending the multidev password to production is harmless but feels wrong. Set `VRT_HTTP_ORIGIN` to restrict credentials to a single origin:
 
 ```sh
-VRT_BASELINE_URL=https://acme.org \
-VRT_TEST_URL=https://staging-acme.pantheonsite.io \
+VRT_BASELINE_URL=https://fixme.org \
+VRT_TEST_URL=https://staging-fixme.pantheonsite.io \
 VRT_HTTP_USER=pantheon \
 VRT_HTTP_PASS='the-shared-password' \
-VRT_HTTP_ORIGIN=https://staging-acme.pantheonsite.io \
+VRT_HTTP_ORIGIN=https://staging-fixme.pantheonsite.io \
 yarn vrt:test
 ```
 
@@ -146,7 +153,7 @@ Don't commit passwords to git. The pragmatic pattern: keep credentials in a per-
 ```jsonc
 {
   "scripts": {
-    "vrt:test": "VRT_TEST_URL=http://acme-site.lndo.site vrt test"
+    "vrt:test": "VRT_BASELINE_URL=https://fixme.org VRT_TEST_URL=http://fixme-site.lndo.site vrt test"
     // For sites with the Pantheon Lock Icon enabled on the test environment,
     // pass credentials via env vars at the command line, e.g.:
     //
