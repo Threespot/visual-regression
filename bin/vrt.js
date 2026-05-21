@@ -2,9 +2,11 @@
 const { spawnSync } = require('child_process');
 const path = require('path');
 const { parseFlags, FlagError } = require('../src/flags');
+const { customizeReport } = require('../src/customize-report');
 
 const PACKAGE_ROOT = path.resolve(__dirname, '..');
 const CONFIG_PATH = path.join(PACKAGE_ROOT, 'playwright.config.js');
+const REPORT_DIR = path.join(process.cwd(), 'visual-regression', 'playwright-report');
 
 function resolvePlaywrightCli() {
   const pkgPath = require.resolve('@playwright/test/package.json');
@@ -76,10 +78,22 @@ function runTest(rawArgs) {
     stdio: 'inherit',
     env,
   });
+
+  try {
+    customizeReport(REPORT_DIR);
+  } catch (err) {
+    process.stderr.write(`vrt: failed to customize HTML report: ${err.message}\n`);
+  }
+
   process.exit(result.status ?? 1);
 }
 
 function runReport() {
+  try {
+    customizeReport(REPORT_DIR);
+  } catch (err) {
+    process.stderr.write(`vrt: failed to customize HTML report: ${err.message}\n`);
+  }
   const result = spawnSync(process.execPath, [resolvePlaywrightCli(), 'show-report'], {
     stdio: 'inherit',
   });
