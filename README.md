@@ -130,6 +130,8 @@ module.exports = {
 
 The file must hold cookies for both hosts in a run: the baseline's and the test's. Cookies are scoped by domain, so one file can carry a cookie for each. Keep the file out of git; it holds a live session.
 
+Each capture uses only the file's live cookies for that capture's host: expired cookies and cookies for other hosts are skipped. If none are left (the session expired, or the file has no cookie for that host), the scenario fails with `storageState file has no live cookie for <hostname>: <path>.`, followed by `storageStateHint`.
+
 A missing or unreadable file fails that scenario with `storageState file not found: <path>.`, followed by `storageStateHint`.
 
 ## HTTP Basic Auth (Pantheon "Lock Icon" environments)
@@ -221,7 +223,7 @@ module.exports = {
 };
 ```
 
-For setup steps (login, dismissing a banner, etc.), use `beforeScreenshot`:
+For setup steps such as dismissing a banner, use `beforeScreenshot`. To log in, use [`storageState`](#logged-in-scenarios-storagestate) instead:
 
 ```js
 module.exports = {
@@ -267,8 +269,12 @@ module.exports = {
   viewports: [ /* optional — overrides the standard three */ ],
   masks: [ /* optional — selectors masked on every scenario */ ],
   beforeScreenshot: async (page, { scenario, viewport }) => { /* optional */ },
+  storageState: '.auth/member.json', // optional: default storage-state file for every scenario
+  storageStateHint: 'Run: yarn auth:save', // optional: appended to storageState errors
 };
 ```
+
+Site-wide only: `storageStateHint` (a string appended to every `storageState` error, e.g. how to create the file). `storageState` can be set here as a default or per scenario.
 
 Per-scenario fields:
 
@@ -279,7 +285,6 @@ Per-scenario fields:
 | `masks`            | string[]                                      | selectors masked in addition to shared    |
 | `beforeScreenshot` | `async (page, { scenario, viewport }) => {}`  | extra per-scenario setup                  |
 | `storageState`     | path to a Playwright storage-state file, or `null` (scenario or site-wide) | log the scenario in (see "Logged-in scenarios") |
-| `storageStateHint` | string (site-wide)                                                         | appended to the missing-file error              |
 | `threshold`        | number                                        | pixelmatch threshold (default 0.1)        |
 | `maxDiffPixelRatio`| number                                        | acceptable ratio of differing pixels (default 0.01) |
 

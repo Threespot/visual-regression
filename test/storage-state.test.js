@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { resolveStorageState, loadStorageStateCookies } = require('../src/storage-state');
+const { resolveStorageState, loadStorageStateCookies, cookiesForHost } = require('../src/storage-state');
 
 function tempFile(name, contents) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-state-'));
@@ -58,4 +58,46 @@ test('malformed JSON is reported', () => {
 test('a file without a cookies array is reported', () => {
   const file = tempFile('empty.json', JSON.stringify({ origins: [] }));
   assert.throws(() => loadStorageStateCookies(file), { message: `storageState file has no cookies array: ${file}.` });
+});
+
+const NOW = 1000;
+const names = (cookies) => cookies.map((c) => c.name);
+
+test('cookiesForHost keeps a cookie whose domain is the exact host', () => {
+  const cookies = [{ name: 'a', domain: 'example.org', expires: NOW + 10 }];
+  assert.deepEqual(names(cookiesForHost(cookies, 'example.org', NOW)), ['a']);
+});
+
+test('cookiesForHost matches a subdomain against a dot-domain', () => {
+  const cookies = [{ name: 'a', domain: '.example.org' }];
+  assert.deepEqual(names(cookiesForHost(cookies, 'www.example.org', NOW)), ['a']);
+  assert.deepEqual(names(cookiesForHost(cookies, 'example.org', NOW)), ['a']);
+});
+
+test('cookiesForHost drops unrelated hosts and suffix-only matches', () => {
+  const cookies = [{ name: 'a', domain: 'example.org' }];
+  assert.deepEqual(cookiesForHost(cookies, 'other.test', NOW), []);
+  assert.deepEqual(cookiesForHost(cookies, 'notexample.org', NOW), []);
+});
+
+test('cookiesForHost drops expired cookies', () => {
+  const cookies = [
+    { name: 'old', domain: 'example.org', expires: NOW - 1 },
+    { name: 'edge', domain: 'example.org', expires: NOW },
+    { name: 'live', domain: 'example.org', expires: NOW + 1 },
+  ];
+  assert.deepEqual(names(cookiesForHost(cookies, 'example.org', NOW)), ['live']);
+});
+
+test('cookiesForHost keeps session cookies (-1 or no expires)', () => {
+  const cookies = [
+    { name: 'neg', domain: 'example.org', expires: -1 },
+    { name: 'none', domain: 'example.org' },
+  ];
+  assert.deepEqual(names(cookiesForHost(cookies, 'example.org', NOW)), ['neg', 'none']);
+});
+
+test('cookiesForHost ignores case', () => {
+  const cookies = [{ name: 'a', domain: '.Example.ORG' }];
+  assert.deepEqual(names(cookiesForHost(cookies, 'WWW.example.org', NOW)), ['a']);
 });

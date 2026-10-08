@@ -45,4 +45,21 @@ function loadStorageStateCookies(file, hint) {
   return state.cookies;
 }
 
-module.exports = { resolveStorageState, loadStorageStateCookies };
+/**
+ * The cookies that are live at `now` (Unix seconds) and apply to `hostname`.
+ * A missing or -1 `expires` is a session cookie and counts as live. A domain
+ * matches the hostname itself or any subdomain of it; one leading dot is
+ * ignored and case does not matter.
+ */
+function cookiesForHost(cookies, hostname, now) {
+  const host = String(hostname).toLowerCase();
+  return cookies.filter((cookie) => {
+    const { expires } = cookie;
+    if (typeof expires === 'number' && expires > 0 && expires <= now) return false;
+    const domain = String(cookie.domain || '').replace(/^\./, '').toLowerCase();
+    if (!domain) return false;
+    return host === domain || host.endsWith(`.${domain}`);
+  });
+}
+
+module.exports = { resolveStorageState, loadStorageStateCookies, cookiesForHost };

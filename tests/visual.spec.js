@@ -5,7 +5,7 @@ const { compareScreenshots } = require('../src/compare');
 const { loadScenariosConfig } = require('../src/scenarios');
 const { joinUrl } = require('../src/global-setup');
 const { pantheonBypassCookies } = require('../src/pantheon');
-const { resolveStorageState, loadStorageStateCookies } = require('../src/storage-state');
+const { resolveStorageState, loadStorageStateCookies, cookiesForHost } = require('../src/storage-state');
 
 const BASELINE_URL = process.env.VRT_BASELINE_URL;
 const TEST_URL = process.env.VRT_TEST_URL;
@@ -42,7 +42,17 @@ async function capture(page, baseUrl, scenario, viewport) {
   // Logged-in scenarios: apply the storage-state cookies before the first load
   const storageStateFile = resolveStorageState(scenario, config);
   if (storageStateFile) {
-    await page.context().addCookies(loadStorageStateCookies(storageStateFile, config.storageStateHint));
+    const hostname = new URL(url).hostname;
+    const cookies = cookiesForHost(
+      loadStorageStateCookies(storageStateFile, config.storageStateHint),
+      hostname,
+      Date.now() / 1000
+    );
+    if (!cookies.length) {
+      const hint = config.storageStateHint ? ` ${config.storageStateHint}` : '';
+      throw new Error(`storageState file has no live cookie for ${hostname}: ${storageStateFile}.${hint}`);
+    }
+    await page.context().addCookies(cookies);
   }
   await page.goto(url, { waitUntil: 'networkidle' });
   await applyWordPressDefaults(page);
