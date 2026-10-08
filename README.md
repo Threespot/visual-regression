@@ -109,6 +109,29 @@ Flags compose. Unknown values error with the list of valid options. (Yarn 4 forw
 yarn vrt:report
 ```
 
+## Logged-in scenarios (storageState)
+
+A scenario can run logged in by pointing `storageState` at a [Playwright storage-state file](https://playwright.dev/docs/auth). The runner adds the file's cookies to the browser before the page's first load. The path is resolved from the site's working directory. Only `cookies` is used; `origins` (localStorage) is ignored.
+
+```js
+module.exports = {
+  // Optional: appended to the error when the file is missing, e.g. how to create it
+  storageStateHint: 'Run: yarn auth:save',
+  // Optional: a default for every scenario
+  // storageState: '.auth/member.json',
+  scenarios: [
+    { label: 'Homepage', path: '/' },
+    { label: 'Dashboard', path: '/dashboard/', storageState: '.auth/member.json' },
+    // With a site-wide default, opt a scenario out:
+    // { label: 'Homepage, logged out', path: '/', storageState: null },
+  ],
+};
+```
+
+The file must hold cookies for both hosts in a run: the baseline's and the test's. Cookies are scoped by domain, so one file can carry a cookie for each. Keep the file out of git; it holds a live session.
+
+A missing or unreadable file fails that scenario with `storageState file not found: <path>.`, followed by `storageStateHint`.
+
 ## HTTP Basic Auth (Pantheon "Lock Icon" environments)
 
 Most Pantheon environments are publicly accessible, but pre-production environments (dev, test, multidev) can be protected with Pantheon's [Security: Lock Environment](https://docs.pantheon.io/guides/secure-development/security-tool) feature, which puts the whole site behind HTTP Basic Auth. When that's enabled, every request — page loads, image requests, and the warm-up fetches the runner does at the start — needs to send an `Authorization: Basic …` header or it gets a 401 and the test fails.
@@ -255,6 +278,8 @@ Per-scenario fields:
 | `path`             | string                                        | required, joined onto baseline + test URL |
 | `masks`            | string[]                                      | selectors masked in addition to shared    |
 | `beforeScreenshot` | `async (page, { scenario, viewport }) => {}`  | extra per-scenario setup                  |
+| `storageState`     | path to a Playwright storage-state file, or `null` (scenario or site-wide) | log the scenario in (see "Logged-in scenarios") |
+| `storageStateHint` | string (site-wide)                                                         | appended to the missing-file error              |
 | `threshold`        | number                                        | pixelmatch threshold (default 0.1)        |
 | `maxDiffPixelRatio`| number                                        | acceptable ratio of differing pixels (default 0.01) |
 

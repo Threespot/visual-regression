@@ -5,6 +5,7 @@ const { compareScreenshots } = require('../src/compare');
 const { loadScenariosConfig } = require('../src/scenarios');
 const { joinUrl } = require('../src/global-setup');
 const { pantheonBypassCookies } = require('../src/pantheon');
+const { resolveStorageState, loadStorageStateCookies } = require('../src/storage-state');
 
 const BASELINE_URL = process.env.VRT_BASELINE_URL;
 const TEST_URL = process.env.VRT_TEST_URL;
@@ -36,6 +37,12 @@ async function capture(page, baseUrl, scenario, viewport) {
   const bypassCookies = pantheonBypassCookies(url);
   if (bypassCookies.length) {
     await page.context().addCookies(bypassCookies);
+  }
+
+  // Logged-in scenarios: apply the storage-state cookies before the first load
+  const storageStateFile = resolveStorageState(scenario, config);
+  if (storageStateFile) {
+    await page.context().addCookies(loadStorageStateCookies(storageStateFile, config.storageStateHint));
   }
   await page.goto(url, { waitUntil: 'networkidle' });
   await applyWordPressDefaults(page);
