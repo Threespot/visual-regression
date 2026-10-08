@@ -38,4 +38,6 @@ module.exports = [
   { label: 'Single Post', path: '/sample-post/' },
   { label: 'News Archive', path: '/news/' },
   { label: '404', path: '/this-page-does-not-exist/' },
+  // Logged in: cookies from a Playwright storage-state file (see README, "Logged-in scenarios")
+  // { label: 'Dashboard', path: '/dashboard/', storageState: '.auth/member.json' },
 ];
