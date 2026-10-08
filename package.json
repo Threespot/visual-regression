@@ -16,6 +16,7 @@
     "README.md"
   ],
   "scripts": {
+    "test": "node --test test/*.test.js",
     "test:cli": "node bin/vrt.js",
     "version:patch": "npm version patch -m \"version %s\"",
     "version:minor": "npm version minor -m \"version %s\"",
